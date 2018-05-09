@@ -315,7 +315,13 @@ namespace ExchangeSharp
         {
             List<ExchangeOrderResult> orders = new List<ExchangeOrderResult>();
             // "datas": [ {"createdAt": 1508219588000, "amount": 92.79323381, "dealValue": 0.00927932, "dealPrice": 0.0001, "fee": 1e-8,"feeRate": 0, "oid": "59e59ac49bd8d31d09f85fa8", "orderOid": "59e59ac39bd8d31d093d956a", "coinType": "KCS", "coinTypePair": "BTC", "direction": "BUY", "dealDirection": "BUY" }, ... ]
-            JToken token = await MakeJsonRequestAsync<JToken>("/order/dealt", null, GetNoncePayload(), "GET");
+            var payload = GetNoncePayload();
+            if (symbol != null)
+            {
+                payload["symbol"] = symbol;
+            }
+
+            JToken token = await MakeJsonRequestAsync<JToken>("/order/dealt?" + GetFormForPayload(payload, false), null, payload, "GET");
             token = CheckError(token);
             if (token != null && token.HasValues)
             {
@@ -329,7 +335,13 @@ namespace ExchangeSharp
             List<ExchangeOrderResult> orders = new List<ExchangeOrderResult>();
             // { "SELL": [{ "oid": "59e59b279bd8d31d093d956e", "type": "SELL", "userOid": null, "coinType": "KCS", "coinTypePair": "BTC", "direction": "SELL","price": 0.1,"dealAmount": 0,"pendingAmount": 100, "createdAt": 1508219688000, "updatedAt": 1508219688000 } ... ],
             //   "BUY":  [{ "oid": "59e42bf09bd8d374c9956caa", "type": "BUY",  "userOid": null, "coinType": "KCS", "coinTypePair": "BTC", "direction": "BUY", "price": 0.00009727,"dealAmount": 31.14503, "pendingAmount": 16.94827, "createdAt": 1508125681000, "updatedAt": 1508125681000 } ... ]
-            JToken token = await MakeJsonRequestAsync<JToken>("/order/active-map", null, GetNoncePayload(), "GET");
+            var payload = GetNoncePayload();
+            if (symbol != null)
+            {
+                payload["symbol"] = symbol;
+            }
+
+            JToken token = await MakeJsonRequestAsync<JToken>("/order/active-map?" + GetFormForPayload(payload, false), null, payload, "GET");
             token = CheckError(token);
             if (token != null && token.HasValues)
             {
@@ -456,7 +468,7 @@ namespace ExchangeSharp
             return new ExchangeOrderResult()
             {
                 OrderId = token["oid"].ToStringInvariant(),                                     
-                Symbol = token["coinType"].ToStringInvariant() + "-" + token["CoinTypePair"].ToStringInvariant(),
+                Symbol = token["coinType"].ToStringInvariant() + "-" + token["coinTypePair"].ToStringInvariant(),
                 IsBuy = token["direction"].ToStringInvariant().Equals("BUY"),
                 Amount = token["amount"].ConvertInvariant<decimal>(),
                 AmountFilled = token["amount"].ConvertInvariant<decimal>(),
