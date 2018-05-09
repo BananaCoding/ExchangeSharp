@@ -459,6 +459,7 @@ namespace ExchangeSharp
                 OrderId = token["oid"].ToStringInvariant(),
                 Symbol = token["coinType"].ToStringInvariant() + "-" + token["coinTypePair"].ToStringInvariant(),
                 IsBuy = token["direction"].ToStringInvariant().Equals("BUY"),
+                Price = token["price"].ConvertInvariant<decimal>(),
                 AveragePrice = token["price"].ConvertInvariant<decimal>(),
                 OrderDate = DateTimeOffset.FromUnixTimeMilliseconds(token["createdAt"].ConvertInvariant<long>()).DateTime
             };
