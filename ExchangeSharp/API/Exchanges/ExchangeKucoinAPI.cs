@@ -354,13 +354,15 @@ namespace ExchangeSharp
 
 
         /// <summary>
-        /// Kucoin does not support retrieving Orders by ID. This uses the default GetCompletedOrderDetailsand filters by orderId
+        /// Kucoin does not support retrieving Orders by ID. This uses the GetCompletedOrderDetails and GetOpenOrderDetails filtered by orderId
         /// </summary>
         /// <param name="orderId"></param>
         /// <returns></returns>
         protected override async Task<ExchangeOrderResult> OnGetOrderDetailsAsync(string orderId, string symbol = null)
         {
-            var orders = await GetCompletedOrderDetailsAsync();
+            var orders = await GetCompletedOrderDetailsAsync(symbol);
+            orders = orders.Concat(await GetOpenOrderDetailsAsync(symbol)).ToList();
+
             return orders?.Where(o => o.OrderId == orderId).FirstOrDefault();
         }
 
