@@ -386,9 +386,20 @@ namespace ExchangeSharp
         /// <returns></returns>
         protected override async Task OnCancelOrderAsync(string orderId, string symbol = null)
         {
+            // Find order detail
+            ExchangeOrderResult order = await GetOrderDetailsAsync(orderId, symbol);
+
+            // There is no order to be cancelled
+            if (order == null)
+            {
+                return;
+            }
+
             var payload = GetNoncePayload();
-            payload["orderOid"] = orderId;
-            JToken token = await MakeJsonRequestAsync<JToken>("/cancel-order", null, payload, "POST");
+            payload["orderOid"] = order.OrderId;
+            payload["symbol"] = order.Symbol;
+            payload["type"] = order.IsBuy ? "BUY" : "SELL";
+            JToken token = await MakeJsonRequestAsync<JToken>("/cancel-order?" + GetFormForPayload(payload, false), null, payload, "POST");
         }
 
         protected override async Task<ExchangeDepositDetails> OnGetDepositAddressAsync(string symbol, bool forceRegenerate = false)
